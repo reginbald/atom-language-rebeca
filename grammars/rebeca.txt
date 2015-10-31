@@ -1,0 +1,248 @@
+Helpers
+	all = [0 .. 127];
+	digit = ['0' .. '9'];
+	nondigit = ['_' + [['a' .. 'z'] + ['A' .. 'Z']]];
+	nonzero_digit = ['1' .. '9'];
+	plus_sign = '+';
+	minus_sign = '-';
+	zero_digit = '0';
+	
+	cr = 13;
+	lf = 10;
+	not_star = [all -'*'];
+	not_star_slash = [not_star -'/'];
+	tab = 9;
+	not_lf_cr = [[all - cr] - lf];
+	
+Tokens
+	blank = (cr | lf | tab | ' ')+;
+	comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
+	line_comment = '//' not_lf_cr* (cr | lf);
+
+	rw_boolean = 'boolean';
+	rw_byte = 'byte';
+	rw_short = 'short';
+	rw_int = 'int';
+	rw_true = 'true';
+	rw_false = 'false';
+	rw_reactiveclass = 'reactiveclass';
+	rw_knownobjects = 'knownobjects';
+	rw_statevars = 'statevars';
+	rw_main = 'main';
+	rw_bind = 'bind';
+	rw_msgsrv = 'msgsrv';
+	rw_if = 'if';
+	rw_else = 'else';
+	rw_self = 'self';
+	rw_sender = 'sender';
+	rw_externalclass = 'externalclass';
+	rw_sends = 'sends';
+	rw_of = 'of';
+	rw_synchmsgs = 'synchmsgs';
+	
+	semicolon = ';';
+	colon = ':';
+	comma = ',';
+	l_par = '(';
+	r_par = ')';
+	l_brace = '{';
+	r_brace = '}';
+	dot = '.';
+	assign = '=';
+	logic_and = '&&';
+	logic_or  = '||';
+	logic_not = '!';
+	comp_equal = '==';
+	comp_notequal = '!=';
+	comp_lt = '<';
+	comp_gt = '>';
+	comp_le = '<=';
+	comp_ge = '>=';
+	plus_op = '+';
+	minus_op = '-';
+	mult_op = '*';
+	div_op = '/';
+	mod_op = '%';
+	question_mark = '?';
+	
+	identifier = nondigit (digit | nondigit)*;
+	decimal_constant = 
+		nonzero_digit digit* | 
+		minus_sign nonzero_digit digit* |
+		zero_digit;
+	
+
+Ignored Tokens
+	blank,
+	line_comment,
+	comment;
+
+Productions
+	rebeca_program = 
+		class_definition* main_definition;
+	
+	class_definition = 
+		{reactiveclass} reactiveclass_definition |
+		{externalclass} externalclass_definition;
+	
+	reactiveclass_definition =
+		rw_reactiveclass [class_name]:identifier l_par [queue_len]:decimal_constant r_par l_brace
+		knownobjects_definition 
+		statevars_definition synchmsgs_declaration? class_msgsrv_definition* r_brace;
+	
+	externalclass_definition = 
+		rw_externalclass [class_name]:identifier rw_of [original_class_name]:identifier
+		l_brace knownobjects_definition sends_definition r_brace;
+		
+	sends_definition =
+		rw_sends l_brace send_definition* r_brace;
+		
+	send_definition =
+		[receiver]:identifier dot [msg_name]:identifier l_par  [msg_actual_parameters]:actual_parameters? r_par semicolon;
+	
+	knownobjects_definition =
+		rw_knownobjects l_brace knownobject_definition* r_brace;
+		
+	statevars_definition =
+		rw_statevars l_brace statevar_definition* r_brace;
+
+	knownobject_definition =
+		[class_name]:identifier [object_name]:identifier semicolon;
+	
+	statevar_definition =
+		type_specifier [var_name]:identifier semicolon;
+		
+	synchmsgs_declaration = 
+		rw_synchmsgs l_brace synchmsg* r_brace;
+		
+	synchmsg = 
+		[synchmsg_name]:identifier l_par [synchmsg_formal_parameters]:parameters? r_par semicolon;	
+	
+	class_msgsrv_definition =
+		rw_msgsrv [msgsrv_name]:identifier l_par [msgsrv_formal_parameters]:parameters? r_par l_brace statement* r_brace;
+		
+	statement =
+		{assignment}   st_assignment |
+		{msg}          st_msg |
+		{if_clause}    st_if_clause ;
+
+	st_assignment =
+		[left_side]:identifier assign right_side semicolon;
+		
+	right_side = 
+		{expression} expression |
+		{non_det_assign} non_det_assign;
+	non_det_assign = 
+		question_mark l_brace choice_list r_brace;
+	
+	choice_list = 
+		{decimal_const} decimal_const_list |
+		{boolean} boolean_list;
+	
+	decimal_const_list = 
+		{last} decimal_constant |
+		{more} decimal_constant comma decimal_const_list;
+	
+	boolean_list = 
+		{last} term_boolean | 
+		{more} term_boolean comma boolean_list;
+	
+	st_msg =
+		message_receiver dot [msg_name]:identifier l_par [msg_actual_parameters]:actual_parameters? r_par semicolon;
+		
+	message_receiver =
+		{identifier} identifier |
+		{self} rw_self;
+		
+	st_if_clause =
+		rw_if l_par expression r_par st_compound st_else_clause?;
+		
+	st_else_clause =
+		rw_else st_compound;
+
+	st_compound =
+		l_brace statement* r_brace;
+
+	expression = 
+		{exp0_simple} exp1 |
+		{exp0_or} expression logic_or exp1;
+		
+	exp1 =
+		{exp1_simple} exp2 |
+		{exp1_and} exp1 logic_and exp2;
+		
+	exp2 =	
+		{exp2_simple} relational_exp |
+		{exp2_equal} exp2 comp_equal relational_exp |
+		{exp2_notequal} exp2 comp_notequal relational_exp |
+		{exp2_senderis} senderis;
+	
+	senderis = 
+		{senderis_exp} rw_sender comp_equal sender_term;
+	
+	sender_term = 
+		{sender_term_self} rw_self |
+		{sender_term_identifier} identifier;	// must be a knownobject	
+	
+		
+	relational_exp = 
+		{simple_additive} additive_exp |
+		{less_than} relational_exp comp_lt additive_exp |
+		{greater_than} relational_exp comp_gt additive_exp |
+		{less_than_or_equal} relational_exp comp_le additive_exp |
+		{greater_than_or_equal} relational_exp comp_ge additive_exp;
+	
+	additive_exp = 
+		{simple_multiplicative} multiplicative_exp |
+		{plus_additive} additive_exp plus_op multiplicative_exp |
+		{minus_additive} additive_exp minus_op multiplicative_exp;
+		
+	multiplicative_exp = 
+		{simple_unary_exp} unary_exp |
+		{mult_multiplicative} multiplicative_exp mult_op unary_exp |
+		{div_multiplicative} multiplicative_exp div_op unary_exp |
+		{mod_multiplicative} multiplicative_exp mod_op unary_exp;
+		
+	unary_exp = 
+		{simple_term} term |
+		{unary_minus} minus_op unary_exp |
+		{unary_plus} plus_op unary_exp |
+		{expression} l_par expression r_par |
+		{logic_not} logic_not unary_exp;
+	
+	term =
+		{term_identifier} identifier |
+		{term_boolean} term_boolean |
+		{term_constant} decimal_constant;
+		
+	term_boolean =
+		{term_false} rw_false |
+		{term_true}  rw_true;
+	
+	main_definition = 
+		rw_main l_brace main_rebec_definition* r_brace;
+
+	main_rebec_definition = 
+		[class_name]:identifier [rebec_name]:identifier 
+		l_par [known_objects_bind]:bindings? r_par colon [l2]:l_par [initial_actual_parameters]:actual_parameters? [r2]:r_par [s2]:semicolon;
+
+	bindings =
+		{last_binding} identifier |
+		{more_binding} identifier comma bindings;
+	
+	type_specifier = 
+		{boolean} rw_boolean |
+		{byte} rw_byte |
+		{short} rw_short |
+		{int} rw_int;
+	
+	parameters = 
+		{last_parameter} var_decl |
+		{more_parameter} var_decl comma parameters;
+	
+	var_decl =
+		type_specifier [var_name]:identifier;
+	
+	actual_parameters = 
+		{last_actual_parameter} expression |
+		{more_actual_parameter} expression comma actual_parameters;
