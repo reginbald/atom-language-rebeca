@@ -1,4 +1,5 @@
-comment: "Created by Jón Reginbald Ívarsson and Ingibjörg Jónsdóttir"
+comment: "Created by Jón Reginbald Ívarsson and Ingibjörg Ósk Jónsdóttir"
+scopeName: 'souce.rebeca'
 fileTypes: [
   "rebeca", "property"
 ]
@@ -7,11 +8,11 @@ patterns: [
   {
     'begin': '//'
     'end': '\\n'
-    'name': 'comment.line.double-slash.avdl'
+    'name': 'comment.line.double-slash.rebeca'
   },
   {
     'begin': '/\\*'
     'end': '\\*/'
-    'name': 'comment.block.avdl'
+    'name': 'comment.block.rebeca'
   }
 ]
