@@ -1,0 +1,28 @@
+{
+  "name": "atom-language-rebeca",
+  "version": "0.0.1",
+  "description": "Syntax highlighting for Rebeca Formal Modeling Language files",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reginbald/rebeca-atom.git"
+  },
+  "keywords": [
+    "atom",
+    "rebeca",
+    "language",
+    "probabilistic"
+    "syntax-highlighting",
+    "timed",
+    "modeling"
+  ],
+  "author": "Jón Reginbald Ívarsson <joni12@ru.is>",
+  "contributors": [{
+    "name": "Ingibjörg Jónsdóttir",
+    "email": "ingibjorg12@ru.is"
+  }],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/reginbald/rebeca-atom/issues"
+  },
+  "homepage": "https://github.com/reginbald/rebeca-atom#readme"
+}
