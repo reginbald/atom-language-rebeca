@@ -4,7 +4,7 @@
   "description": "Syntax highlighting for Rebeca Formal Modeling Language files",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/reginbald/rebeca-atom.git"
+    "url": "git+https://github.com/reginbald/atom-language-rebeca.git"
   },
   "keywords": [
     "atom",
@@ -22,7 +22,7 @@
   }],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/reginbald/rebeca-atom/issues"
+    "url": "https://github.com/reginbald/atom-language-rebeca/issues"
   },
-  "homepage": "https://github.com/reginbald/rebeca-atom#readme"
+  "homepage": "https://github.com/reginbald/atom-language-rebeca#readme"
 }
